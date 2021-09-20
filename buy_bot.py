@@ -11,10 +11,11 @@ if __name__ == '__main__':
         upbit.set_loglevel('D')
  
         # 종목 조회
-        item_list = upbit.get_items("KRW", "BTC")
+        #item_list = upbit.get_items("KRW", "BTC")
+        buy_item = upbit.buycoin_mp('KRW-BTC', '10000')
  
         # 결과 출력
-        logging.info(item_list)
+        logging.info(buy_item)
  
     except KeyboardInterrupt:
         logging.error("KeyboardInterrupt Exception 발생!")

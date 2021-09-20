@@ -1,6 +1,17 @@
 import time
 import logging
 import requests
+import jwt
+import uuid
+import hashlib
+
+from urllib.parse import urlencode
+from decimal import Decimal
+
+# Keys
+access_key = 'HnXpKzTa0Tc6VECpUxFxfSZ70yHWWQwY8eW2MoJE'
+secret_key = 'WCZ19YZktxLPga1msebnROZS781frzKl0QxnXiMr'
+server_url = 'https://api.upbit.com'
 
 
 """
@@ -141,5 +152,45 @@ def get_items(market, except_item):
         return rtn_list
 
 
+    except Exception:
+        raise
+
+
+
+
+"""
+- Name: buycoin_mp
+- Desc: 시장가로 매수합니다.
+- Input
+    1) target_item: 대상종목
+    2) buy_amount: 매수금액
+- Output
+    1) rtn_data: 매수결과
+"""
+
+def buycoin_mp(target_item, buy_amount):
+    try:
+        query = {'market': target_item, 'side': 'bid', 'price': buy_amount, 'ord_type': 'price',}
+        query_string = urlencode(query).encode()
+
+        m = hashlib.sha512()
+        m.update(query_string)
+        query_hash = m.hexdigest()
+
+        payload = {'access_key': access_key,'nonce': str(uuid.uuid4()),'query_hash': query_hash,'query_hash_alg': 'SHA512',}
+        jwt_token = jwt.encode(payload, secret_key)
+        authorize_token = 'Bearer {}'.format(jwt_token)
+        headers = {"Authorization": authorize_token}
+
+        res = send_request("POST", server_url + "/v1/orders", query, headers)
+        rtn_data = res.json()
+
+        logging.info("")
+        logging.info("----------------------------------------------")
+        logging.info("시장가 매수 완료!")
+        logging.info(rtn_data)
+        logging.info("----------------------------------------------")
+
+        return rtn_data
     except Exception:
         raise
